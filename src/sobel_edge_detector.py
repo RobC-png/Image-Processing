@@ -94,12 +94,27 @@ def detect_edges_sobel(input_path, output_path):
     pixels = image_to_blur(pixels)
     image_from_array(pixels, "output/step3_blurred.png")
 
-    # Apply Sobel operator
+    # Apply Sobel operator and find max value for normalization
+    edge_values = []
     for i in range(len(pixels)):
         for j in range(len(pixels[i])):
             PM = get3X3matrix(pixels, i, j)
             edgyness = getedgyness(PM)
-            pixels[i][j] = (edgyness, edgyness, edgyness)
+            edge_values.append(edgyness)
+    
+    # Normalize edge values to 0-255 range
+    max_edge = max(edge_values) if edge_values else 1
+    min_edge = min(edge_values) if edge_values else 0
+    edge_range = max_edge - min_edge if max_edge != min_edge else 1
+    
+    for i in range(len(pixels)):
+        for j in range(len(pixels[i])):
+            PM = get3X3matrix(pixels, i, j)
+            edgyness = getedgyness(PM)
+            # Normalize to 0-255
+            normalized = int(((edgyness - min_edge) / edge_range) * 255)
+            normalized = max(0, min(255, normalized))  # Clamp to 0-255
+            pixels[i][j] = (normalized, normalized, normalized)
             
     # Save the processed image
     image_from_array(pixels, output_path)
