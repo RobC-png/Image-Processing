@@ -1,74 +1,22 @@
 # Edge Detector
 
-A comprehensive collection of image processing tools for edge detection, color extraction, and document scanning.
+A collection of image processing tools I built while messing around with python.
 
-## Features
+## What's in here
 
-- **Canny Edge Detection** - Advanced edge detection using OpenCV's Canny algorithm
-- **Sobel Edge Detection** - Custom implementation of Sobel operator for edge detection
-- **Document Scanner** - Interactive four-point perspective transformation for document scanning
-- **Color Extraction** - Extract bright and colorful colors from images using K-means clustering
-- **Shading Removal** - Remove shadows and shading while preserving colors
+- **Canny Edge Detection** - OpenCV's Canny algorithm wrapped in a simple CLI
+- **Sobel Edge Detection** - Custom edge detection via gradient calculation
+- **Document Scanner** - Click 4 corners of a document, get a perspective-corrected crop
+- **Color Extraction** - K-means clustering to pull out the most vibrant colors
+- **Shading Removal** - Remove dark shadows while keeping colors intact
 
-## Installation
+## Quick start
 
-1. Clone the repository:
-```bash
-git clone https://github.com/RobC-png/Edge-Detector.git
-cd Edge-Detector
-```
-
-2. Install the required dependencies:
 ```bash
 pip install -r requirements.txt
-```
-
-## Usage
-
-### Canny Edge Detection
-```python
-from src.canny_edge_detector import detect_edges_canny
-
-edges = detect_edges_canny('path/to/image.jpg', 'output/edges.png')
-```
-
-### Sobel Edge Detection
-```python
-from src.sobel_edge_detector import detect_edges_sobel
-
-detect_edges_sobel('path/to/image.jpg', 'output/sobel.png')
-```
-
-### Document Scanner
-```python
-from src.document_scanner import detect_document
-
-# Click four corners of the document in order, it will be transformed
-detect_document('path/to/document.jpg')
-```
-
-### Color Extraction
-```python
-from src.color_extractor import extract_bright_colorful_colors
-
-colors = extract_bright_colorful_colors('path/to/image.jpg', num_colors=8)
-print(colors)
-```
-
-### Shading Removal
-```python
-from src.remove_shading import remove_shading_and_keep_colors
-
-remove_shading_and_keep_colors('path/to/image.jpg', 'output/no_shading.jpg')
+python main.py
 ```
 
 ## Requirements
 
-- Python 3.7+
-- OpenCV
-- NumPy
-- Pillow
-- scikit-learn
-- Matplotlib
-
-See `requirements.txt` for full list.
+Python 3.7+, OpenCV, NumPy, Pillow, scikit-learn, Matplotlib

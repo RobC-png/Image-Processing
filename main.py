@@ -91,7 +91,7 @@ def option_canny():
         
         show_display = input("Display result? (y/n): ").strip().lower()
         if show_display == 'y':
-            display_edges(input_path, output_path)
+            display_edges(input_path, output_path, show_plot=True)
     except AssertionError as e:
         print(f"✗ Error: {e}")
     except Exception as e:

@@ -3,18 +3,18 @@ import numpy as np
 from sklearn.cluster import KMeans
 import os
 
-def extract_bright_colorful_colors(image_path, num_colors=8, brightness_threshold=150, saturation_threshold=50):
+def extract_bright_colorful_colors(image_path, num_colors=8, brightness_threshold=100, saturation_threshold=30):
     """
     Extract bright and colorful colors from an image using K-means clustering.
     
     Args:
         image_path: Path to input image
-        num_colors: Number of color clusters
-        brightness_threshold: Minimum brightness value (0-255)
-        saturation_threshold: Minimum saturation value (0-255)
+        num_colors: Number of color clusters to extract
+        brightness_threshold: Minimum brightness value (0-255) for filtering
+        saturation_threshold: Minimum saturation value (0-255) for filtering
     
     Returns:
-        List of RGB color values
+        List of RGB color values sorted by brightness
     """
     try:
         # Suppress the physical cores warning
@@ -30,43 +30,47 @@ def extract_bright_colorful_colors(image_path, num_colors=8, brightness_threshol
         pixels = image_rgb.reshape((-1, 3))
 
         # Perform k-means clustering for color quantization
-        kmeans = KMeans(n_clusters=num_colors, n_init=10)
+        kmeans = KMeans(n_clusters=num_colors, n_init=10, random_state=42)
         kmeans.fit(pixels)
 
         # Get the cluster centers
         cluster_centers = kmeans.cluster_centers_
 
-        # Filter clusters based on brightness and saturation
-        filtered_clusters = []
+        # Score clusters by brightness and saturation
+        scored_clusters = []
         for center in cluster_centers:
             # Reshape center to a 1x1 array
             center_reshaped = center.reshape((1, 1, 3))
 
-            # Convert cluster center to HSV
+            # Convert cluster center to HSV for brightness and saturation analysis
             center_hsv = cv2.cvtColor(center_reshaped.astype(np.uint8), cv2.COLOR_RGB2HSV)[0][0]
+            
+            brightness = center_hsv[2]
+            saturation = center_hsv[1]
+            
+            # Score based on combination of brightness and saturation
+            # Prefer bright and saturated colors, but don't strictly filter
+            score = brightness * 0.6 + saturation * 0.4
+            
+            scored_clusters.append((score, center))
 
-            # Check brightness and saturation thresholds
-            if center_hsv[2] > brightness_threshold and center_hsv[1] > saturation_threshold:
-                filtered_clusters.append(center)
+        # Sort by score (brightness + saturation) and take top num_colors
+        scored_clusters.sort(reverse=True, key=lambda x: x[0])
+        top_clusters = [center for score, center in scored_clusters[:num_colors]]
 
-        # Convert the filtered clusters back to uint8
-        filtered_clusters = np.array(filtered_clusters, dtype=np.uint8)
+        # Convert to uint8
+        top_clusters = np.array(top_clusters, dtype=np.uint8)
 
-        # Convert the colors to BGR for display
-        filtered_colors_bgr = cv2.cvtColor(filtered_clusters.reshape((1, -1, 3)), cv2.COLOR_RGB2BGR)
+        # Convert the colors to a list of RGB values
+        colors_rgb = top_clusters.tolist()
 
-        # Display the filtered colors
-        cv2.imshow('Filtered Colors', filtered_colors_bgr)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-        # Convert the filtered colors to a list of RGB values
-        filtered_colors_rgb = filtered_clusters.tolist()
-
-        return filtered_colors_rgb
+        return colors_rgb
 
     except UnicodeDecodeError as e:
         print(f"UnicodeDecodeError: {e}")
+    except Exception as e:
+        print(f"Error: {e}")
+        return []
 
 if __name__ == "__main__":
     result = extract_bright_colorful_colors('samples/sample_image.jpg', num_colors=8, 

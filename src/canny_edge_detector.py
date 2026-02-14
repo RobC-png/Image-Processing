@@ -25,27 +25,35 @@ def detect_edges_canny(input_path, output_path=None, low_threshold=100, high_thr
     
     return edges
 
-def display_edges(input_path, output_path=None):
+def display_edges(input_path, output_path=None, show_plot=False):
     """
     Display original image and edge-detected image side by side.
+    
+    Args:
+        input_path: Path to input image
+        output_path: Path to save output image
+        show_plot: Whether to display matplotlib window (default False)
     """
     img = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
     edges = detect_edges_canny(input_path, output_path)
     
-    plt.figure(figsize=(12, 5))
-    plt.subplot(121)
-    plt.imshow(img, cmap='gray')
-    plt.title('Original Image')
-    plt.xticks([])
-    plt.yticks([])
+    if show_plot:
+        plt.figure(figsize=(12, 5))
+        plt.subplot(121)
+        plt.imshow(img, cmap='gray')
+        plt.title('Original Image')
+        plt.xticks([])
+        plt.yticks([])
+        
+        plt.subplot(122)
+        plt.imshow(edges, cmap='gray')
+        plt.title('Canny Edge Detection')
+        plt.xticks([])
+        plt.yticks([])
+        
+        plt.show()
     
-    plt.subplot(122)
-    plt.imshow(edges, cmap='gray')
-    plt.title('Canny Edge Detection')
-    plt.xticks([])
-    plt.yticks([])
-    
-    plt.show()
+    return edges
 
 if __name__ == "__main__":
     # Example usage

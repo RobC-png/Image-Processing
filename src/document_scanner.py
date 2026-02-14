@@ -1,41 +1,57 @@
 import cv2
 import numpy as np
 
-# Global variables to store user-defined points
-user_points = []
-
 def mouse_callback(event, x, y, flags, param):
-    global user_points, image, original_image
-
+    """Mouse callback for point selection."""
     if event == cv2.EVENT_LBUTTONDOWN:
+        # Get data from param dictionary
+        user_points = param['points']
+        image = param['image']
+        original_image = param['original']
+        
         # Capture the clicked point
         user_points.append((x, y))
-
+        
         # Draw a circle at the clicked point on the image
         cv2.circle(image, (x, y), 5, (0, 255, 0), -1)
         cv2.imshow("Select Points", image)
-
+        
         # If four points are selected, proceed to perspective transformation
         if len(user_points) == 4:
+            param['complete'] = True
             rect = order_points(np.array(user_points))
             transformed_image = four_point_transform(original_image, rect)
             cv2.imwrite("output/transformed_image.png", transformed_image)
             cv2.destroyAllWindows()
 
 def detect_document(image_path):
-    global user_points, image, original_image
-
-    # Step 1: Read the image
+    """Detect document by selecting four corner points."""
+    # Read the image
     image = cv2.imread(image_path)
     original_image = image.copy()
-
-    # Step 3: Create a window to select user-defined points
+    
+    # Prepare callback data
+    callback_data = {
+        'points': [],
+        'image': image,
+        'original': original_image,
+        'complete': False
+    }
+    
+    # Create a window to select user-defined points
     cv2.namedWindow("Select Points")
-    cv2.setMouseCallback("Select Points", mouse_callback)
-
-    # Step 4: Display the image and wait for user to click four points
+    cv2.setMouseCallback("Select Points", mouse_callback, callback_data)
+    
+    # Display the image and wait for user to click four points
     cv2.imshow("Select Points", image)
-    cv2.waitKey(0)
+    print("Click on 4 corners of the document...")
+    
+    # Wait until points are selected
+    while not callback_data['complete']:
+        key = cv2.waitKey(100)
+        if key == 27:  # ESC to cancel
+            cv2.destroyAllWindows()
+            break
 
 def four_point_transform(image, pts):
     # Get the transformed rectangle's width and height
